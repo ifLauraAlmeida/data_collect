@@ -42,3 +42,9 @@ A informação que queremos está dentro de div, onde a class é td-page-content
 
 Agora buscaremos o segundo parágrafo, onde começa em <p> e termina com </p> 
 dando print(div_page.find_all("p")) você consegue chegar nesse resultado de achar o segundo parágrafo, que é o que buscamos.
+
+A partir desse parágrafo damos paragrafo.find_all["em"] para buscar todos os "em", e isso se torna uma LISTA.
+
+O mesmo pode ser feito para outros personagens, apenas mudando o nome no link.
+
+Colocando então os headers e cookies dentro de uma função, podemos buscar diferentes nomes de Resident Evil dentro do mesmo código.
