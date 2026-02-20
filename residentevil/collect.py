@@ -73,7 +73,15 @@ def get_personagens_infos(url):
         print("Não foi possível obter os dados.")
         return {}
 # %%
-url = 'https://www.residentevildatabase.com/personagens/alex-wesker/'
+def get_links():
+    url = 'https://www.residentevildatabase.com/personagens'
+    resp = requests.get(url, headers = headers)
+    soup_personagens = BeautifulSoup(resp.text)
 
-get_personagens_infos(url)
+    ancoras = (soup_personagens.find("div", class_ ="td-page-content")
+        .find_all("a"))
+
+
+    links = [i["href"] for i in ancoras]
+    return links
 # %%
