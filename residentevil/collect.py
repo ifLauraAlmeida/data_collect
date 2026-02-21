@@ -2,7 +2,7 @@
 
 import requests
 from bs4 import BeautifulSoup 
-
+from tqdm import tqdm
 
 
 def get_content(url):
@@ -39,16 +39,22 @@ def get_content(url):
     return resp
 
 def get_basic_infos(soup):
-    #print(soup.prettify())
-    div_page = soup.find("div", class_ ="td-page-content")
-    paragrafo = div_page.find_all("p")[1] # busca o segundo paragrafo da div_page
-    ems = paragrafo.find_all("em")
+    div_page = soup.find("div", class_="td-page-content")
+    paragrafos = div_page.find_all("p")
+
+    if len(paragrafos) < 2:
+        return {}
+
+    ems = paragrafos[1].find_all("em")
+
     data = {}
+
     for i in ems:
-        chave, valor = i.text.split(":") #corta onde tem :
-        chave = chave.strip(" ")
-        data[chave] = valor.strip(" ") #corta os espaços
-    
+        partes = i.text.split(":", 1)
+        if len(partes) == 2:
+            chave, valor = partes
+            data[chave.strip()] = valor.strip()
+
     return data
 
 def get_aparicoes(soup):
@@ -75,7 +81,7 @@ def get_personagens_infos(url):
 # %%
 def get_links():
     url = 'https://www.residentevildatabase.com/personagens'
-    resp = requests.get(url, headers = headers)
+    resp = get_content(url)
     soup_personagens = BeautifulSoup(resp.text)
 
     ancoras = (soup_personagens.find("div", class_ ="td-page-content")
@@ -84,4 +90,15 @@ def get_links():
 
     links = [i["href"] for i in ancoras]
     return links
+# %%
+links = get_links()
+data = []
+for i in tqdm(links):
+    d = get_personagens_infos(i)
+    d["link"] = i
+    data.append(d)
+    
+# %%
+
+data[]
 # %%
