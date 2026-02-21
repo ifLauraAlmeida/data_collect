@@ -78,7 +78,7 @@ def get_personagens_infos(url):
     else: 
         print("Não foi possível obter os dados.")
         return {}
-# %%
+
 def get_links():
     url = 'https://www.residentevildatabase.com/personagens'
     resp = get_content(url)
@@ -100,5 +100,5 @@ for i in tqdm(links):
     
 # %%
 
-data[]
+data
 # %%
