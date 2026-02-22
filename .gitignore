@@ -210,17 +210,6 @@ __marimo__/
 # DATA ENGINEERING - PROJETO
 # ===========================
 
-# Pastas de dados do projeto
-data/raw/
-data/interim/
-data/processed/
-
-# Arquivos de dados comuns
-*.csv
-*.parquet
-*.feather
-*.h5
-
 # Bancos locais para testes
 *.db
 *.sqlite3
