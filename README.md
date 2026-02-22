@@ -1,50 +1,114 @@
-# data_collect
+<h1 align="center">🎮 Data Collect: Resident Evil Database</h1>
 
-Pipeline de coleta de dados desenvolvido durante o curso Data Collect do Teo Me Why. Inclui processos de scraping, tratamento, validação e armazenamento estruturado de dados, simulando cenários reais de engenharia de dados.
+Este projeto foi desenvolvido durante o curso **Data Collect** do canal **Teo Me Why**.  
+O objetivo é construir um pipeline completo de Engenharia de Dados, desde a coleta via web scraping até o armazenamento estruturado em múltiplos formatos.
 
-## Configuração de ambiente 
+> https://www.youtube.com/watch?v=K-bIZt_hSBo&t=2611s
 
-Criar um interpretador de python, usarei o *.venv* (o Téo usa o anaconda), assim você aloja todas as bibliotecas de um mesmo projeto nesse interpretador, ele que RODARÁ o projeto nele mesmo, você isolar as dependências de um projeto para outro.
+---
+<h1 align="center">⚙️ Configuração do Ambiente</h1>
 
-1 - Abra o terminal na pasta do projeto e digite
+Para garantir reprodutibilidade e isolamento de dependências, utilizamos **venv**, ferramenta nativa do Python para criação de ambientes virtuais.
+
+- ### 1️⃣ Criação do ambiente
+
+```bash
 python -m venv .venv
+```
+- ### 2️⃣ Ativação
 
-2 - Ative-o digitando
-.venv\Scripts\Activate
+#### Windows
+```bash
+.venv\Scripts\activate
+```
 
-3 - Confirme visualizando o (.venv) no terminal e o caminho do seu projeto ao lado.
-
-Requests será a biblioteca utilizada para requisitar dados de sites.
-Importe ela com: 
-pip install requests 
-* no TERMINAL dentro do .venv 
-
-Através do import requests, você pode puxar informações de um HTML, tendo o google como exemplo, você pode através do .status_code verificar o http status code, basicamente o que diz se a conexão com o site deu OK ou não, dependendo ele retornará um valor, dando 200, a conexão foi completa com sucesso.
-
-Além disso, com o .text, você visualiza a string que corresponde a página do google.
-
-Tentando pegar o perfil de Ada Wong no site do Resident Evil DATABASE (copiando a URL), ele retorna um erro, pois muitas vezes o site pede que seja um humano, não um script.
-Para contornar isso abra as configurações de DESENVOLVEDOR (ctrl+shift+i), clicando em NETWORK, dando após um ctrl+r, você verifica que ele requisita o ada.wong/, clicando com o botão direito, você seleciona "copy" e depois "copy as curl(POSIX)", copiamos o que o nosso navegador envia de requisição para um endereço, e assim retornar os valores da Ada, agora com isso copiado, você pode "traduzir" pro python, buscando um curl to python no google e abrindo qualquer conversor, nele você recebe agora tudo pronto para que seu script FINJA ser um humano navegando normalmente.
-
-Nele recebemos cookies e headers, que basicamente são informações que o navegador envia junto com a requisição para provar quem ele é e manter a sessão ativa.
-
-Com isso, status_code 200, conseguimos conectar!
-
-O text retorna então TODA A PÁGINA DA ADA, absolutamente tudo.
+#### Linux/Mac
+```bash
+source .venv/bin/activate
+```
 
 
-Clicando em ELEMENTS ou melhor, em INSPECTOR com o inspector ativado, depois clicando na setinha ao lado, você pode passar o mouse pela página e buscar no HTML, partes de onde o seu mouse passa.
+- #### 3️⃣ Instalação das dependências
+```bash
+pip install requests beautifulsoup4 pandas tqdm pyarrow fastparquet
+```
+---
+<h1 align="center">🕷️ Fundamentos da Coleta de Dados</h1>
 
-Agora vamos utilizar BeautifulSoup, pip install beautifulsoup4
-Para importar, from bs4 import BeautifulSoup.
+### 🌐 Requisições HTTP e Autenticação
 
-A informação que queremos está dentro de div, onde a class é td-page-content
+Utilizamos a biblioteca requests para comunicação via protocolo HTTP.
+O atributo status_code verifica se a requisição foi bem-sucedida (200). Para contornar bloqueios do site, simulamos uma requisição humana:
 
-Agora buscaremos o segundo parágrafo, onde começa em <p> e termina com </p> 
-dando print(div_page.find_all("p")) você consegue chegar nesse resultado de achar o segundo parágrafo, que é o que buscamos.
+`Abrimos o DevTools (F12) → aba Network`
 
-A partir desse parágrafo damos paragrafo.find_all["em"] para buscar todos os "em", e isso se torna uma LISTA.
+`Copiamos como cURL (POSIX)`
 
-O mesmo pode ser feito para outros personagens, apenas mudando o nome no link.
+`Convertendo para Python com headers e cookies (ex: User-Agent)`
 
-Colocando então os headers e cookies dentro de uma função, podemos buscar diferentes nomes de Resident Evil dentro do mesmo código.
+`Isso permite simular uma sessão real de navegação.`
+
+<h1 align="center">🔎 Parsing com BeautifulSoup</h1>
+
+
+Após obter o HTML via .text, utilizamos BeautifulSoup para navegar na árvore DOM:
+
+Localizamos a div principal `(td-page-content)`.
+
+**Extraímos:**
+
+- Parágrafos
+- Tags < em > com chaves/valores das características
+- Iteramos sobre todos os links da página principal para automatizar a coleta
+
+<h3 align="center">💾 Armazenamento e Formatos de Arquivo</h3>
+
+Os dados são estruturados em um DataFrame do Pandas e exportados para diferentes formatos.
+
+| Formato  | Tipo                 | Características                                                         |
+|----------|----------------------|-------------------------------------------------------------------------|
+| CSV      | Texto (Plano)        | Legível por humanos, não preserva tipos de dados e ocupa mais espaço  |
+| Parquet  | Binário (Colunar)    | Compactado, preserva tipos e é otimizado para Big Data                |
+| Pickle   | Binário (Serializado)| Salva o estado exato do objeto Python                                 |
+
+⚠️ Para Engenharia de Dados, **Parquet é preferível** ao CSV devido à **performance e preservação de metadados**, funcionará melhor como um "checkpoint".
+
+---
+<h1 align="center">🧩 Estrutura do Código</h1>
+
+O script principal é modularizado em funções:
+
+- **get_content(url)** → `Realiza requisição HTTP com headers/cookies`
+
+- **get_basic_infos(soup)** → `Extrai descrições textuais`
+
+- **get_aparicoes(soup)** → `Mapeia jogos/mídias onde o personagem aparece`
+
+- **get_links()** → `Coleta URLs de todos os personagens`
+
+---
+
+<h1 align="center">🎓 Conclusão</h1>
+
+Este projeto foi uma imersão prática no ciclo de vida inicial do dado:
+
+**Extração bruta → Transformação → Estruturação → Persistência**
+
+Durante o desenvolvimento, foram resolvidos desafios reais como bloqueio de requisições automatizadas, mapeamento de elementos no DOM, estruturação leve de dados desorganizados, o resultado é um dataset limpo, estruturado e pronto para análise.
+
+---
+<h1 align="center">🚀 Skills Desenvolvidas</h1>
+
+**🕷️ Web Scraping & Automação `(requests + BeautifulSoup)`**
+
+**🌐 Engenharia de Requisições `(headers e cookies)`**
+
+**📊 Tratamento e estruturação com Pandas**
+
+**💾 Serialização `(CSV vs Parquet vs Pickle)`**
+
+**🧪 Ambientes isolados com `venv`**
+
+**⏳ Monitoramento com `tqdm`**
+
+> Projeto desenvolvido para fins educacionais como prática de Engenharia de Dados.
